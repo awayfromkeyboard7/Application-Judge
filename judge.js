@@ -62,9 +62,9 @@ async function deleteFile(filename) {
 }
 
 async function judgeCode(userCode) {
-  const filename = await createExecFile('python3', 'problem2', 'user1', userCode);
-  const userOutput = await execCode('problem2', 'user1', filename);
-  const result = await compareOutput('problem2', userOutput);
+  const filename = await createExecFile('python3', 'problem1', 'user1', userCode);
+  const userOutput = await execCode('problem1', 'user1', filename);
+  const result = await compareOutput('problem1', userOutput);
 
   return {
     result: result,
