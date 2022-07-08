@@ -1,0 +1,22 @@
+{
+  "name": "judge-docker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awayfromkeyboard7/Judge-Docker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/awayfromkeyboard7/Judge-Docker/issues"
+  },
+  "homepage": "https://github.com/awayfromkeyboard7/Judge-Docker#readme",
+  "dependencies": {
+    "express": "4.18.1"
+  }
+}
