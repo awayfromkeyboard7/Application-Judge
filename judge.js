@@ -28,7 +28,7 @@ async function execCode(problemId, userId, filename) {
   // ref: https://infotech-2.tistory.com/62
   // ref: https://balmostory.tistory.com/33
 
-  const CMD = `docker run --rm -i -v $(pwd)/code:/code \
+  const CMD = `sudo docker run --rm -i -v $(pwd)/code:/code \
                 -e PROBLEM=${problemId} -e USER=${userId} -e SUBMIT=${filename} \
                 --security-opt seccomp=$(pwd)/code/profile.json judge:py`
   let result = await exec(CMD);
