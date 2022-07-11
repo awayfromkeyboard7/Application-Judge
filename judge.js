@@ -43,12 +43,16 @@ async function execCode(problemId, userId, filename) {
 
 async function compareOutput(problemId, userOutput) {
   const outputDir = fs.readdirSync(`./code/${problemId}/output`, 'utf-8');
+  const results = [];
   for (let i = 0; i < outputDir.length; i++) {
       if (userOutput[i] != fs.readFileSync(`./code/${problemId}/output/${outputDir[i]}`).toString()) {
-        return false;
-    }
+        results.push(false);
+      }
+      else {
+        results.push(true);
+      }
   }
-  return true;
+  return results;
 }
 
 async function deleteFile(filename) {
@@ -64,10 +68,10 @@ async function deleteFile(filename) {
 async function judgeCode(userCode) {
   const filename = await createExecFile('python3', 'problem1', 'user1', userCode);
   const userOutput = await execCode('problem1', 'user1', filename);
-  const result = await compareOutput('problem1', userOutput);
+  const results = await compareOutput('problem1', userOutput);
 
   return {
-    result: result,
+    results: results,
     msg: userOutput
   };
 }
