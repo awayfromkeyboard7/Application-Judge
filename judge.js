@@ -31,14 +31,8 @@ async function execCode(problemId, userId, filename) {
   const CMD = `sudo docker run --rm -i -v $(pwd)/code:/code \
                 -e PROBLEM=${problemId} -e USER=${userId} -e SUBMIT=${filename} \
                 --security-opt seccomp=$(pwd)/code/profile.json judge:py`
-  let result = await exec(CMD);
-  if (result.stderr) {
-    let errCode = result.stderr.toString().split('\n');
-    return errCode[3];
-  } else {
-    const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
-    return results
-  }
+  const result = await exec(CMD);
+  return result.stdout.toString().split("{EOF}\n").slice(0, -1);
 }
 
 async function compareOutput(problemId, userOutput) {
