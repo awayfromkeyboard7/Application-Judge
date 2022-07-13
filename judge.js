@@ -33,7 +33,7 @@ async function createExecFile(userId, problemId, lang, code) {
 
 async function execCode(userId, problemId, lang, filename) {
   console.log(problemId);
-  const CMD = `docker run --rm -i \
+  const CMD = `sudo docker run --rm -i \
                 -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
                 -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
                 -v $(pwd)/code/${lang}:/code/${lang} \
