@@ -12,9 +12,9 @@ const extension = {
 }
 
 async function createExecFile(userId, problemId, lang, code) {
-
+  
   const dir = `./code/${problemId}/${userId}`;
-
+  console.log(userId);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true
@@ -32,16 +32,20 @@ async function createExecFile(userId, problemId, lang, code) {
 }
 
 async function execCode(userId, problemId, lang, filename) {
-  console.log(problemId);
-  const CMD = `sudo docker run --rm -i \
+  // const CMD = `sudo docker run --rm -i \
+  //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
+  //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
+  //               -v $(pwd)/code/${lang}:/code/${lang} \
+  //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
+  //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
+     
+  const CMD = `docker run --rm -i \
                 -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
                 -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
                 -v $(pwd)/code/${lang}:/code/${lang} \
                 -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
                 --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
-                
   const result = await exec(CMD);
-  console.log(result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
   return results;
 }
@@ -69,9 +73,6 @@ async function judgeCode(userId, problemId, lang, code) {
   const filename = await createExecFile(userId, problemId, lang, code);
   const output = await execCode(userId, problemId, extension[lang], filename);
   const results = await compareOutput(problemId, output);
-  // await deleteFile('./code/c1.py');
-  // console.log(results);
-  // console.log(output);
 
   let passRates = results.reduce((a, b) => a + b, 0);
   passRates = passRates / results.length * 100
