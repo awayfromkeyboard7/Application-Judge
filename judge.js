@@ -12,9 +12,9 @@ const extension = {
 }
 
 async function createExecFile(userId, problemId, lang, code) {
-
+  
   const dir = `./code/${problemId}/${userId}`;
-
+  console.log(userId);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true
@@ -38,7 +38,13 @@ async function execCode(userId, problemId, lang, filename) {
                 -v $(pwd)/code/${lang}:/code/${lang} \
                 -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
                 --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
-                
+     
+  // const CMD = `docker run --rm -i \
+  //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
+  //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
+  //               -v $(pwd)/code/${lang}:/code/${lang} \
+  //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
+  //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
   const result = await exec(CMD);
   // console.log(result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
