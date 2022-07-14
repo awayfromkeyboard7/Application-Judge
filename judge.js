@@ -32,8 +32,7 @@ async function createExecFile(userId, problemId, lang, code) {
 }
 
 async function execCode(userId, problemId, lang, filename) {
-  console.log(problemId);
-  const CMD = `docker run --rm -i \
+  const CMD = `sudo docker run --rm -i \
                 -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
                 -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
                 -v $(pwd)/code/${lang}:/code/${lang} \
@@ -41,7 +40,7 @@ async function execCode(userId, problemId, lang, filename) {
                 --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
                 
   const result = await exec(CMD);
-  console.log(result);
+  // console.log(result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
   return results;
 }
@@ -55,8 +54,9 @@ async function compareOutput(problemId, userOutput) {
   return results;
 }
 
-async function deleteFile(filename) {
-  await fs.unlink(filename, function(err) {
+async function deleteFile(userId, problemId, lang, filename) {
+  const dir = `./code/${problemId}/${userId}`;
+  await fs.unlink(`${dir}/${filename}.${extension[lang]}`, function(err) {
     if (err !== null) {
       console.log(`Fail to delete file ${err.code}`);
       return false;
@@ -69,7 +69,7 @@ async function judgeCode(userId, problemId, lang, code) {
   const filename = await createExecFile(userId, problemId, lang, code);
   const output = await execCode(userId, problemId, extension[lang], filename);
   const results = await compareOutput(problemId, output);
-  // await deleteFile('./code/c1.py');
+  await deleteFile(userId, problemId, lang, filename);
   // console.log(results);
   // console.log(output);
 
