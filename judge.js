@@ -14,7 +14,6 @@ const extension = {
 async function createExecFile(userId, problemId, lang, code) {
   
   const dir = `./code/${problemId}/${userId}`;
-  console.log(userId);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true
@@ -72,12 +71,20 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
+  // console.log(userId, problemId, lang, code);
+  if (userId === undefined || problemId === undefined || lang === undefined || code === undefined) {
+    return {
+      results: [],
+      passRate: [],
+      msg: [`you passed undefined params!!! userId: ${userId}, problemId: ${problemId}, lang: ${lang}, code: ${code}`]
+    };
+  }
   const filename = await createExecFile(userId, problemId, lang, code);
   const output = await execCode(userId, problemId, extension[lang], filename);
   const results = await compareOutput(problemId, output);
   await deleteFile(userId, problemId, lang, filename);
-  // console.log(results);
-  // console.log(output);
+  console.log('code results: ', results);
+  console.log('code output: ',  output);
 
   let passRates = results.reduce((a, b) => a + b, 0);
   passRates = passRates / results.length * 100
