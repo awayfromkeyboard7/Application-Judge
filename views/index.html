@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main.html</title>
+</head>
+<body>
+    <h1>main page</h1>
+
+    <form id="codeForm" action="/judge" method="POST">
+      <h2>Select Laguage: Python3</h2>
+      <p>
+        <textarea rows="10" id="code"></textarea>
+      </p>
+      <p>
+        <textarea rows="1" id="user"></textarea>
+      </p>
+      <select name="language" id="lang">
+        <option value="Python">python</option>
+        <option value="JavaScript">javascript</option>
+      </select>
+      <select name="what problem?" id="problemId">
+        <option value="62c973cd465933160b9499c1">personal</option>
+        <option value="62cea4c0de41eb81f44ed976">team</option>
+      </select>
+      <input type="submit" id="submitCode" value="submit"/>
+    </form>
+
+    <h1 class="hidden" id="result"></h1>
+    <!-- <h1>output:</h1> -->
+    <!-- <h1 id="output"></h1> -->
+
+    <script src="./main.js"></script>
+</body>
+</html>

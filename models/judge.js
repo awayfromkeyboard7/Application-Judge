@@ -8,13 +8,12 @@ const extension = {
   'JavaScript': 'js',
   'C': 'c',
   'C++': 'cpp',
-  'java': 'java'
+  'Java': 'java'
 }
 
 async function createExecFile(userId, problemId, lang, code) {
   
   const dir = `./code/${problemId}/${userId}`;
-  console.log(userId);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true
@@ -32,21 +31,25 @@ async function createExecFile(userId, problemId, lang, code) {
 }
 
 async function execCode(userId, problemId, lang, filename) {
-  const CMD = `sudo docker run --rm -i \
-                -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
-                -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
-                -v $(pwd)/code/${lang}:/code/${lang} \
-                -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
-                --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
-     
-  // const CMD = `docker run --rm -i \
+
+  /* 미리 구해놓은 정답 파일 크기의 2배를 넘어가면 출력초과 */
+
+  // const CMD = `sudo docker run --rm -i \
   //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
   //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
   //               -v $(pwd)/code/${lang}:/code/${lang} \
   //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
   //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
+     
+  const CMD = `docker run --rm -i \
+                -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
+                -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
+                -v $(pwd)/code/${lang}:/code/${lang} \
+                -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
+                -e STDOUTLIMIT=20 \
+                --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
   const result = await exec(CMD);
-  // console.log(result);
+  console.log(result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
   return results;
 }
@@ -79,12 +82,12 @@ async function judgeCode(userId, problemId, lang, code) {
   // console.log(results);
   // console.log(output);
 
-  let passRates = results.reduce((a, b) => a + b, 0);
-  passRates = passRates / results.length * 100
+  let passRate = results.reduce((a, b) => a + b, 0);
+  passRate = passRate / results.length * 100;
 
   return {
     results,
-    passRate: passRates,
+    passRate,
     msg: output
   };
 }
