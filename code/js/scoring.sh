@@ -6,5 +6,5 @@ SUBMIT=$4
 STDOUTLIMIT=$5
 
 for d in ./code/$PROBLEM/input/*;
-do timeout 5 node ./code/$PROBLEM/$USER/$SUBMIT.js < $d | head -n $STDOUTLIMIT 2>&1; echo "{EOF}";
+do node ./code/$PROBLEM/$USER/$SUBMIT.js < $d | head -n $STDOUTLIMIT; echo "{EOF}"; echo "{ERR}" >&2;
 done

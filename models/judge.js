@@ -50,8 +50,20 @@ async function execCode(userId, problemId, lang, filename) {
   const CMD = `bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20`
   
   const result = await exec(CMD);
+  // console.log('judge result:::::', result.stdout.toString(), result.stderr.toString());
   console.log('judge result:::::', result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
+  const errors = result.stderr.split("{ERR}\n").slice(0, -1);
+
+  for (let i = 0; i < errors.length; i++) {
+    let err = ''
+    if (lang === 'py') {
+      err = errors[i].split("\n").slice(-3, -1);
+    } else if (lang === 'js') {
+      err = errors[i].split("\n").slice(1, 5);
+    }
+    results[i] += err.join("\n");
+  }
   return results;
 }
 
