@@ -13,16 +13,17 @@ function codeSubmit(event) {
   const code = codetext.value;
   const lang = language.value;
   const problemId = problem.value;
-  const userId = user.value;
+  const gitId = user.value;
+  console.log(gitId)
 
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/judge", true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.send(JSON.stringify({
-      userId,
-      problemId,
-      lang,
-      code
+    gitId,
+    problemId,
+    lang,
+    code
   }));
   
   xhr.onload = function() {

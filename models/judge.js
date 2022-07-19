@@ -34,23 +34,23 @@ async function execCode(userId, problemId, lang, filename) {
 
   /* 미리 구해놓은 정답 파일 크기의 2배를 넘어가면 출력초과 */
 
-  const CMD = `sudo docker run --rm -i \
-                -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
-                -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
-                -v $(pwd)/code/${lang}:/code/${lang} \
-                -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
-                -e STDOUTLIMIT=20 \
-                judge:${lang}`
-     
-  // const CMD = `docker run --rm -i \
+  // const CMD = `sudo docker run --rm -i \
   //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
   //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
   //               -v $(pwd)/code/${lang}:/code/${lang} \
   //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
   //               -e STDOUTLIMIT=20 \
-  //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
+  //               judge:${lang}`
+
+  // USER=$1
+  // PROBLEM=$2
+  // LANGUAGE=$3
+  // SUBMIT=$4
+  // STDOUTLIMIT=$5
+  const CMD = `bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20`
+  
   const result = await exec(CMD);
-  console.log(result);
+  // console.log('judge result:::::', result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
   return results;
 }
@@ -76,8 +76,8 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
-  // console.log(userId, problemId, lang, code);
-  if (userId === undefined || problemId === undefined || lang === undefined || code === undefined) {
+  console.log(userId, problemId, lang, code);
+  if (userId === undefined || userId === '' || problemId === undefined || lang === undefined || code === undefined) {
     return {
       results: [],
       passRate: [],
@@ -88,8 +88,8 @@ async function judgeCode(userId, problemId, lang, code) {
   const output = await execCode(userId, problemId, extension[lang], filename);
   const results = await compareOutput(problemId, output);
   await deleteFile(userId, problemId, lang, filename);
-  console.log('code results: ', results);
-  console.log('code output: ',  output);
+  // console.log('code results: ', results);
+  // console.log('code output: ',  output);
 
   let passRate = results.reduce((a, b) => a + b, 0);
   passRate = passRate / results.length * 100;
