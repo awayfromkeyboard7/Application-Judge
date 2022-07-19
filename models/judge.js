@@ -50,7 +50,7 @@ async function execCode(userId, problemId, lang, filename) {
   const CMD = `bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20`
   
   const result = await exec(CMD);
-  // console.log('judge result:::::', result);
+  console.log('judge result:::::', result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
   return results;
 }
@@ -76,7 +76,7 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
-  console.log(userId, problemId, lang, code);
+  // console.log(userId, problemId, lang, code);
   if (userId === undefined || userId === '' || problemId === undefined || lang === undefined || code === undefined) {
     return {
       results: [],

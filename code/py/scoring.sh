@@ -14,5 +14,5 @@ STDOUTLIMIT=$5
 
 
 for d in ./code/$PROBLEM/input/*;
-do timeout 5 python ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT 2>&1; echo "{EOF}";
+do timeout 5 python3 ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT 2>&1; echo "{EOF}";
 done
