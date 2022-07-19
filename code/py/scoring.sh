@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 USER=$1
 PROBLEM=$2
 LANGUAGE=$3
@@ -14,5 +14,5 @@ STDOUTLIMIT=$5
 
 
 for d in ./code/$PROBLEM/input/*;
-do timeout 3 node ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT 2>&1; echo "{EOF}";
+do timeout 5 python ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT 2>&1; echo "{EOF}";
 done

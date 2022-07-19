@@ -34,20 +34,21 @@ async function execCode(userId, problemId, lang, filename) {
 
   /* 미리 구해놓은 정답 파일 크기의 2배를 넘어가면 출력초과 */
 
-  // const CMD = `sudo docker run --rm -i \
-  //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
-  //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
-  //               -v $(pwd)/code/${lang}:/code/${lang} \
-  //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
-  //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
-     
-  const CMD = `docker run --rm -i \
+  const CMD = `sudo docker run --rm -i \
                 -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
                 -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
                 -v $(pwd)/code/${lang}:/code/${lang} \
                 -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
                 -e STDOUTLIMIT=20 \
                 --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
+     
+  // const CMD = `docker run --rm -i \
+  //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
+  //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
+  //               -v $(pwd)/code/${lang}:/code/${lang} \
+  //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
+  //               -e STDOUTLIMIT=20 \
+  //               --security-opt seccomp=$(pwd)/code/profile.json judge:${lang}`
   const result = await exec(CMD);
   console.log(result);
   const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
