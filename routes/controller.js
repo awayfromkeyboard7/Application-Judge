@@ -7,9 +7,9 @@ exports.mainView = function(req, res) {
   })
 }
 
-exports.judgeCode = async function(req, res) {
+exports.judgeCode = function(req, res) {
   // judge 서버에 채점 요청
   console.log("submit from MAIN SERVER::::::", req.body);
-  const result = await Judge(req.body['gitId'], req.body['problemId'], req.body['lang'], req.body['code']);
+  const result = Judge(req.body['gitId'], req.body['problemId'], req.body['lang'], req.body['code']);
   res.status(200).json(result);
 }

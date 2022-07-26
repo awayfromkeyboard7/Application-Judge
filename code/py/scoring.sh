@@ -14,5 +14,5 @@ STDOUTLIMIT=$5
 
 
 for d in ./code/$PROBLEM/input/*;
-do python3 ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT ; echo "{EOF}"; echo "{ERR}" >&2;
+do python3 ./code/submission/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT ; echo "{EOF}"; echo "{ERR}" >&2;
 done
