@@ -1,3 +1,4 @@
+require("dotenv").config();
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const { totalInputDict, totalOutputDict } = require("./loadText");
@@ -45,6 +46,7 @@ async function execCode(userId, problemId, lang, filename) {
   const srcfile = `./code/submission/${problemId}/${filename}.${extension[lang]}`;
   const outputs = [];
   const errors = [];
+  console.log(process.env.UID);
   for (let i = 0; i < totalInputDict[problemId].length; i++) {
     const child = spawnSync(command[lang], [srcfile], {
       input: totalInputDict[problemId][i],
@@ -53,7 +55,7 @@ async function execCode(userId, problemId, lang, filename) {
       /* timeout 3s */
       timeout: 3000,
       /* excute with guest permissions */
-      uid: process.env.UID,
+      uid: parseInt(process.env.UID),
     });
 
     // 시간초과, 출력초과 처리
