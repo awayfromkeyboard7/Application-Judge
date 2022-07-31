@@ -88,6 +88,7 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
+  try {
   // console.log(userId, problemId, lang, code);
   if (userId === undefined || userId === '' || problemId === undefined || lang === undefined || code === undefined) {
     return {
@@ -111,6 +112,14 @@ async function judgeCode(userId, problemId, lang, code) {
     passRate,
     msg: output
   };
+  } catch(e) {
+  console.log(e);
+  return {
+    results: [],
+    passRate: -1,
+    msg: e
+  }
+  }
 }
 
 module.exports = judgeCode;
