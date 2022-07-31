@@ -20,7 +20,7 @@ const command = {
 };
 
 async function createExecFile(userId, problemId, lang, code) {
-  const dir = `./code/submission/${problemId}/${userId}`;
+  const dir = `./code/submission/${problemId}`;
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true,
@@ -42,7 +42,7 @@ async function createExecFile(userId, problemId, lang, code) {
 }
 
 async function execCode(userId, problemId, lang, filename) {
-  const srcfile = `./code/submission/${problemId}/${userId}/${filename}.${extension[lang]}`;
+  const srcfile = `./code/submission/${problemId}/${filename}.${extension[lang]}`;
   const outputs = [];
   const errors = [];
   for (let i = 0; i < totalInputDict[problemId].length; i++) {
@@ -95,7 +95,7 @@ async function compareOutput(problemId, userOutput) {
 }
 
 async function deleteFile(userId, problemId, lang, filename) {
-  const dir = `./code/submission/${problemId}/${userId}`;
+  const dir = `./code/submission/${problemId}/`;
   fs.unlink(`${dir}/${filename}.${extension[lang]}`, function (err) {
     if (err !== null) {
       console.log(`Fail to delete file ${err.code}`);
