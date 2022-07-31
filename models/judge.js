@@ -32,7 +32,7 @@ async function createExecFile(userId, problemId, lang, code) {
   fs.writeFileSync(
     `${dir}/${filename}.${extension[lang]}`,
     code,
-    {'mode': 0o777},
+    {'mode': 0o755},
     function (err) {
       if (err !== null) {
         console.log(`Fail to create file ${err.code}`);
@@ -106,7 +106,6 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
-  console.log(problemId)
   try {
     if (
       userId === undefined ||
@@ -124,7 +123,6 @@ async function judgeCode(userId, problemId, lang, code) {
       };
     }
     const filename = await createExecFile(userId, problemId, lang, code);
-    console.log(filename);
     const { outputs, errors } = await execCode(
       userId,
       problemId,
