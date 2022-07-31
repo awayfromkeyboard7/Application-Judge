@@ -1,124 +1,160 @@
-const util = require('util');
-const fs = require('fs');
-const exec = util.promisify(require('child_process').exec);
-const uuid = require('uuid');
+const fs = require("fs");
+const { spawnSync } = require("child_process");
+const { totalInputDict, totalOutputDict } = require("./loadText");
+const uuid = require("uuid");
 
 const extension = {
-  'Python': 'py',
-  'JavaScript': 'js',
-  'C': 'c',
-  'C++': 'cpp',
-  'Java': 'java'
-}
+  Python: "py",
+  JavaScript: "js",
+  C: "c",
+  "C++": "cpp",
+  Java: "java",
+};
+
+const command = {
+  Python: "python3",
+  JavaScript: "node",
+  C: "c",
+  "C++": "cpp",
+  Java: "java",
+};
 
 async function createExecFile(userId, problemId, lang, code) {
-  
   const dir = `./code/submission/${problemId}/${userId}`;
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
-      recursive: true
+      recursive: true,
     });
   }
 
   const filename = uuid.v4();
-  fs.writeFileSync(`${dir}/${filename}.${extension[lang]}`, code, function(err) {
-    if (err !== null) {
-      console.log(`Fail to create file ${err.code}`);
-      return false;
+  fs.writeFileSync(
+    `${dir}/${filename}.${extension[lang]}`,
+    code,
+    function (err) {
+      if (err !== null) {
+        console.log(`Fail to create file ${err.code}`);
+        return false;
+      }
     }
-  })
+  );
   return filename;
 }
 
 async function execCode(userId, problemId, lang, filename) {
+  const srcfile = `./code/submission/${problemId}/${userId}/${filename}.${extension[lang]}`;
+  const outputs = [];
+  const errors = [];
+  for (let i = 0; i < totalInputDict[problemId].length; i++) {
+    const child = spawnSync(command[lang], [srcfile], {
+      input: totalInputDict[problemId][i],
+      /* 미리 구해놓은 정답 파일 크기의 3배를 넘어가면 출력초과 */
+      maxBuffer: Math.max(totalOutputDict[problemId][i].length * 2, 1000),
+      /* timeout 3s */
+      timeout: 3000,
+      /* excute with guest permissions */
+      uid: process.env.UID,
+    });
 
-  /* 미리 구해놓은 정답 파일 크기의 2배를 넘어가면 출력초과 */
-
-  // const CMD = `sudo docker run --rm -i \
-  //               -v $(pwd)/code/${problemId}/input:/code/${problemId}/input \
-  //               -v $(pwd)/code/${problemId}/${userId}:/code/${problemId}/${userId} \
-  //               -v $(pwd)/code/${lang}:/code/${lang} \
-  //               -e USER=${userId} -e PROBLEM=${problemId} -e LANGUAGE=${lang} -e SUBMIT=${filename} \
-  //               -e STDOUTLIMIT=20 \
-  //               judge:${lang}`
-
-  // USER=$1
-  // PROBLEM=$2
-  // LANGUAGE=$3
-  // SUBMIT=$4
-  // STDOUTLIMIT=$5
-  const CMD = `sudo su -c "bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20" guest`
-  // sudo su -c "bash ./code/py/scoring.sh ex 62c973cd465933160b9499c1 py ex 40" guest
-  const result = await exec(CMD);
-  // console.log('judge result:::::', result.stdout.toString(), result.stderr.toString());
-  console.log('judge result:::::', result);
-  const results = result.stdout.toString().split("{EOF}\n").slice(0, -1);
-  const errors = result.stderr.split("{ERR}\n").slice(0, -1);
-
-  for (let i = 0; i < errors.length; i++) {
-    let err = ''
-    if (lang === 'py') {
-      err = errors[i].split("\n").slice(-3, -1);
-    } else if (lang === 'js') {
-      err = errors[i].split("\n").slice(1, 5);
+    // 시간초과, 출력초과 처리
+    if (child.error) {
+      const error = child.error.toString().split(" ")[3];
+      if (error === 'ENOBUFS') outputs.push("출력초과");
+      else if (error === 'ETIMEDOUT') outputs.push("시간초과");
+      else outputs.push(child.error.toString().split(" ")[3]);
+      continue;
     }
-    results[i] += err.join("\n");
+    if (child.stdout) {
+      outputs.push(child.stdout.toString().trim());
+      const error = child.stderr.toString();
+
+      if (child.stderr.length > 0) {
+        const errLog = [];
+        for (e of error.split("\n")) {
+          if (e.includes("Error")) {
+            errLog.push(e);
+          }
+        }
+        errors.push(errLog.join("\n"));
+      }
+    }
   }
-  return results;
+  return { outputs, errors };
 }
 
 async function compareOutput(problemId, userOutput) {
-  const outputDir = fs.readdirSync(`./code/answer/${problemId}/output`, 'utf-8');
   const results = [];
-  for (let i = 0; i < outputDir.length; i++) {
-    results.push(userOutput[i].trim() === fs.readFileSync(`./code/answer/${problemId}/output/${outputDir[i]}`).toString().trim())
+  try {
+    for (let i = 0; i < totalOutputDict[problemId].length; i++) {
+      results.push(userOutput[i].trim() === totalOutputDict[problemId][i]);
+    }
+    return results;
+  } catch (e) {
+    console.log("compare output error", e);
   }
-  return results;
 }
 
 async function deleteFile(userId, problemId, lang, filename) {
   const dir = `./code/submission/${problemId}/${userId}`;
-  await fs.unlink(`${dir}/${filename}.${extension[lang]}`, function(err) {
+  fs.unlink(`${dir}/${filename}.${extension[lang]}`, function (err) {
     if (err !== null) {
       console.log(`Fail to delete file ${err.code}`);
       return false;
     }
-  })
+  });
   return true;
 }
 
 async function judgeCode(userId, problemId, lang, code) {
   try {
-  // console.log(userId, problemId, lang, code);
-  if (userId === undefined || userId === '' || problemId === undefined || lang === undefined || code === undefined) {
+    if (
+      userId === undefined ||
+      userId === "" ||
+      problemId === undefined ||
+      lang === undefined ||
+      code === undefined
+    ) {
+      return {
+        results: [],
+        passRate: [],
+        msg: [
+          `you passed undefined params!!! userId: ${userId}, problemId: ${problemId}, lang: ${lang}, code: ${code}`,
+        ],
+      };
+    }
+    const filename = await createExecFile(userId, problemId, lang, code);
+    const { outputs, errors } = await execCode(
+      userId,
+      problemId,
+      lang,
+      filename
+    );
+    const results = await compareOutput(problemId, outputs);
+    await deleteFile(userId, problemId, lang, filename);
+
+    if (errors.length !== 0) {
+      return {
+        results,
+        passRate: 0,
+        msg: errors,
+      };
+    }
+
+    let passRate = results.reduce((a, b) => a + b, 0);
+    passRate = (passRate / results.length) * 100;
+
+    return {
+      results,
+      passRate,
+      msg: outputs,
+    };
+  } catch (e) {
+    console.log(e);
     return {
       results: [],
-      passRate: [],
-      msg: [`you passed undefined params!!! userId: ${userId}, problemId: ${problemId}, lang: ${lang}, code: ${code}`]
+      passRate: -1,
+      msg: e,
     };
-  }
-  const filename = await createExecFile(userId, problemId, lang, code);
-  const output = await execCode(userId, problemId, extension[lang], filename);
-  const results = await compareOutput(problemId, output);
-  await deleteFile(userId, problemId, lang, filename);
-  // console.log('code results: ', results);
-  // console.log('code output: ',  output);
-
-  let passRate = results.reduce((a, b) => a + b, 0);
-  passRate = passRate / results.length * 100;
-
-  return {
-    results,
-    passRate,
-    msg: output
-  };
-  } catch(e) {
-  console.log(e);
-  return {
-    results: [],
-    passRate: -1,
-    msg: e
-  }
   }
 }
 
