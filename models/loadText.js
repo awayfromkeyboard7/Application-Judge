@@ -8,7 +8,7 @@ async function loadInputTexts() {
     const submissionDir = fs.readdirSync('./code/submission', 'utf-8');
     for (const problemId of submissionDir) {
         const inputDir = fs.readdirSync(`./code/submission/${problemId}/input`, 'utf-8');
-        totalInputDict[problemId] = [];
+	totalInputDict[problemId] = [];
         for (let i = 0; i < inputDir.length; i++) {
             totalInputDict[problemId].push(fs.readFileSync(`./code/submission/${problemId}/input/${inputDir[i]}`).toString().trim());
         }

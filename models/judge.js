@@ -32,6 +32,7 @@ async function createExecFile(userId, problemId, lang, code) {
   fs.writeFileSync(
     `${dir}/${filename}.${extension[lang]}`,
     code,
+    {'mode': 0o777},
     function (err) {
       if (err !== null) {
         console.log(`Fail to create file ${err.code}`);
@@ -46,7 +47,6 @@ async function execCode(userId, problemId, lang, filename) {
   const srcfile = `./code/submission/${problemId}/${filename}.${extension[lang]}`;
   const outputs = [];
   const errors = [];
-  console.log(process.env.UID);
   for (let i = 0; i < totalInputDict[problemId].length; i++) {
     const child = spawnSync(command[lang], [srcfile], {
       input: totalInputDict[problemId][i],
@@ -57,7 +57,6 @@ async function execCode(userId, problemId, lang, filename) {
       /* excute with guest permissions */
       uid: parseInt(process.env.UID),
     });
-
     // 시간초과, 출력초과 처리
     if (child.error) {
       const error = child.error.toString().split(" ")[3];
@@ -69,7 +68,6 @@ async function execCode(userId, problemId, lang, filename) {
     if (child.stdout) {
       outputs.push(child.stdout.toString().trim());
       const error = child.stderr.toString();
-
       if (child.stderr.length > 0) {
         const errLog = [];
         for (e of error.split("\n")) {
@@ -108,6 +106,7 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
+  console.log(problemId)
   try {
     if (
       userId === undefined ||
@@ -125,6 +124,7 @@ async function judgeCode(userId, problemId, lang, code) {
       };
     }
     const filename = await createExecFile(userId, problemId, lang, code);
+    console.log(filename);
     const { outputs, errors } = await execCode(
       userId,
       problemId,
