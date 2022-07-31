@@ -12,7 +12,8 @@ STDOUTLIMIT=$5
 # if [ $? -eq 124 ]; then echo TIME OUT; else echo {EOF}; fi
 # done
 
-
-for d in ./code/$PROBLEM/input/*;
-do python3 ./code/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT ; echo "{EOF}"; echo "{ERR}" >&2;
+for d in ./code/submission/$PROBLEM/input/*;
+do timeout 3 python3 ./code/submission/$PROBLEM/$USER/$SUBMIT.py < $d | head -n $STDOUTLIMIT ; echo "{EOF}"; echo "{ERR}" >&2;
 done
+
+exit

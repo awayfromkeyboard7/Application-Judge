@@ -13,7 +13,7 @@ const extension = {
 
 async function createExecFile(userId, problemId, lang, code) {
   
-  const dir = `./code/${problemId}/${userId}`;
+  const dir = `./code/submission/${problemId}/${userId}`;
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {
       recursive: true
@@ -47,8 +47,8 @@ async function execCode(userId, problemId, lang, filename) {
   // LANGUAGE=$3
   // SUBMIT=$4
   // STDOUTLIMIT=$5
-  const CMD = `bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20`
-  
+  const CMD = `sudo su -c "bash ./code/${lang}/scoring.sh ${userId} ${problemId} ${lang} ${filename} 20" guest`
+  // sudo su -c "bash ./code/py/scoring.sh ex 62c973cd465933160b9499c1 py ex 40" guest
   const result = await exec(CMD);
   // console.log('judge result:::::', result.stdout.toString(), result.stderr.toString());
   console.log('judge result:::::', result);
@@ -68,16 +68,16 @@ async function execCode(userId, problemId, lang, filename) {
 }
 
 async function compareOutput(problemId, userOutput) {
-  const outputDir = fs.readdirSync(`./code/${problemId}/output`, 'utf-8');
+  const outputDir = fs.readdirSync(`./code/answer/${problemId}/output`, 'utf-8');
   const results = [];
   for (let i = 0; i < outputDir.length; i++) {
-    results.push(userOutput[i].trim() === fs.readFileSync(`./code/${problemId}/output/${outputDir[i]}`).toString().trim())
+    results.push(userOutput[i].trim() === fs.readFileSync(`./code/answer/${problemId}/output/${outputDir[i]}`).toString().trim())
   }
   return results;
 }
 
 async function deleteFile(userId, problemId, lang, filename) {
-  const dir = `./code/${problemId}/${userId}`;
+  const dir = `./code/submission/${problemId}/${userId}`;
   await fs.unlink(`${dir}/${filename}.${extension[lang]}`, function(err) {
     if (err !== null) {
       console.log(`Fail to delete file ${err.code}`);
@@ -88,6 +88,7 @@ async function deleteFile(userId, problemId, lang, filename) {
 }
 
 async function judgeCode(userId, problemId, lang, code) {
+  try {
   // console.log(userId, problemId, lang, code);
   if (userId === undefined || userId === '' || problemId === undefined || lang === undefined || code === undefined) {
     return {
@@ -111,6 +112,14 @@ async function judgeCode(userId, problemId, lang, code) {
     passRate,
     msg: output
   };
+  } catch(e) {
+  console.log(e);
+  return {
+    results: [],
+    passRate: -1,
+    msg: e
+  }
+  }
 }
 
 module.exports = judgeCode;
