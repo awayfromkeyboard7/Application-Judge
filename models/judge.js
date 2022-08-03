@@ -131,7 +131,6 @@ async function judgeCode(userId, problemId, lang, code) {
     );
     const results = await compareOutput(problemId, outputs);
     await deleteFile(userId, problemId, lang, filename);
-
     if (errors.length !== 0) {
       return {
         results,
