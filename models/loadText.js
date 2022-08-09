@@ -34,6 +34,18 @@ async function loadAnswerTexts() {
 loadInputTexts()
 loadAnswerTexts()
 
+fs.writeFile('./inputs.txt', JSON.stringify(totalInputDict), function(err) {
+    if (err) {
+        console.log(err);
+    }
+})
+
+fs.writeFile('./outputs.txt', JSON.stringify(totalOutputDict), function(err) {
+    if (err) {
+        console.log(err);
+    }
+})
+
 module.exports = {
     totalInputDict,
     totalOutputDict,

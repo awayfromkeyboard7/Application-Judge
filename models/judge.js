@@ -50,7 +50,7 @@ async function execCode(userId, problemId, lang, filename) {
   for (let i = 0; i < totalInputDict[problemId].length; i++) {
     const child = spawnSync(command[lang], [srcfile], {
       input: totalInputDict[problemId][i],
-      /* 미리 구해놓은 정답 파일 크기의 3배를 넘어가면 출력초과 */
+      /* 미리 구해놓은 정답 파일 크기의 2배를 넘어가면 출력초과 */
       maxBuffer: Math.max(totalOutputDict[problemId][i].length * 2, 1000),
       /* timeout 3s */
       timeout: 3000,

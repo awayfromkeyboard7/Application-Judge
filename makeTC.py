@@ -20,7 +20,7 @@ def make_test_case():
         submission_path = 'submission/' + str(problem['_id']) + '/input'
         answer_path = 'answer/' + str(problem['_id']) + '/output'
 
-        # submission folder rwxrwxrwx
+        # submission folder rwxr-xr-x
         os.makedirs(submission_path, mode=0o755, exist_ok=True)
 
         # answer folder rwx------
